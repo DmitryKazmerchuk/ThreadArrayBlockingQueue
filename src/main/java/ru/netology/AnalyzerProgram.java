@@ -66,7 +66,7 @@ public class AnalyzerProgram {
 
         Thread threadC = new Thread(() -> {
             try {
-                Thread.sleep(1_350);
+                Thread.sleep(250);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
