@@ -2,57 +2,65 @@ package ru.netology;
 
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AnalyzerProgram {
 
     public static ArrayBlockingQueue<String> queueA = new ArrayBlockingQueue<>(100);
     public static ArrayBlockingQueue<String> queueB = new ArrayBlockingQueue<>(100);
     public static ArrayBlockingQueue<String> queueC = new ArrayBlockingQueue<>(100);
-    public static CopyOnWriteArrayList<ArrayBlockingQueue<String>> queueList = new CopyOnWriteArrayList<>();
 
 
     public static void main(String[] args) throws InterruptedException {
 
         Thread thread = new Thread(() -> {
-            for (int i = 0; i < 100; i++) {
-
+            String[] texts = new String[100];
+            for (int i = 0; i < texts.length; i++) {
+                texts[i] = generateText("abc", 100_000);
                 try {
-                    queueA.put(generateText("abc", 100_000));
-                    queueB.put(generateText("abc", 100_000));
-                    queueC.put(generateText("abc", 100_000));
+                    queueA.put(texts[i]);
+                    queueB.put(texts[i]);
+                    queueC.put(texts[i]);
 
                 } catch (InterruptedException e) {
                     return;
                 }
             }
-            queueList.add(queueA);
-            queueList.add(queueB);
-            queueList.add(queueC);
         }
         );
 
-
         Thread threadA = new Thread(() -> {
             try {
-                Thread.sleep(450);
+                Thread.sleep(150);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            String strMaxA = comparisonSymbol(queueList,'a');
-
-            System.out.println("A: " + strMaxA);
+            String strMaxA = comparisonSymbol(queueA, 'a');
+            int count = 0;
+            for (int i = 0; i < strMaxA.length(); i++) {
+                if (strMaxA.charAt(i) == 'a') {
+                    count++;
+                }
+            }
+            System.out.println();
+            System.out.println("Текст с символом 'a'. Количество символов 'a' -> " + count + "." + "\n" + strMaxA);
         }
         );
 
         Thread threadB = new Thread(() -> {
             try {
-                Thread.sleep(900);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            String strMaxB = comparisonSymbol(queueList,'b');
-            System.out.println("B: " + strMaxB);
+            String strMaxB = comparisonSymbol(queueB, 'b');
+            int count = 0;
+            for (int i = 0; i < strMaxB.length(); i++) {
+                if (strMaxB.charAt(i) == 'b') {
+                    count++;
+                }
+            }
+            System.out.println();
+            System.out.println("Текст с символом 'b'. Количество символов 'b' -> " + count + "." + "\n" + strMaxB);
         }
         );
 
@@ -62,8 +70,15 @@ public class AnalyzerProgram {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            String strMaxC = comparisonSymbol(queueList,'c');
-            System.out.println("C: " + strMaxC);
+            String strMaxC = comparisonSymbol(queueC, 'c');
+            int count = 0;
+            for (int i = 0; i < strMaxC.length(); i++) {
+                if (strMaxC.charAt(i) == 'b') {
+                    count++;
+                }
+            }
+            System.out.println();
+            System.out.println("Текст с символом 'c'. Количество символов 'c' -> " + count + "." + "\n" + strMaxC);
         }
         );
 
@@ -76,18 +91,16 @@ public class AnalyzerProgram {
         threadB.join();
         threadA.join();
         thread.join();
-
     }
-    public static String comparisonSymbol(CopyOnWriteArrayList<ArrayBlockingQueue<String>> queueList, char symbol) {
-        int count = 0;
+
+    public static String comparisonSymbol(ArrayBlockingQueue<String> queue, char symbol) {
         int countMax = 0;
         String strMax = null;
-        for(ArrayBlockingQueue<String> queue : queueList) {
-            for (String str : queue) {
-                for (int i = 0; i < str.length(); i++) {
-                    if (str.charAt(i) == symbol) {
-                        count++;
-                    }
+        for (String str : queue) {
+            int count = 0;
+            for (int i = 0; i < str.length(); i++) {
+                if (str.charAt(i) == symbol) {
+                    count++;
                 }
                 if (count > countMax) {
                     countMax = count;
@@ -97,6 +110,7 @@ public class AnalyzerProgram {
         }
         return strMax;
     }
+
     public static String generateText(String letters, int length) {
         Random random = new Random();
         StringBuilder text = new StringBuilder();
